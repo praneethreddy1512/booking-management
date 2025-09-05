@@ -18,16 +18,23 @@ const bookingSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['confirmed', 'cancelled','pending'],
+    enum: ['confirmed', 'cancelled', 'pending'],
     default: 'pending'
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+    index: true
+  },
+  notes: {
+  type: String,
+  default: "",
+}
+
 });
-bookingSchema.index({ slotId: 1 }, { unique: true });
+
+// Compound index for faster latest lookup
+bookingSchema.index({ userId: 1, slotId: 1, providerId: 1, createdAt: -1 });
 
 const BookingModel = mongoose.model('BookingModel', bookingSchema);
-
 export default BookingModel;

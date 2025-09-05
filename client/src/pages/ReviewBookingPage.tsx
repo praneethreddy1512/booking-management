@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface Provider {
   service: string;
@@ -19,37 +21,40 @@ interface UserInfo {
   address?: string;
 }
 
-const ReviewBookingPage: React.FC<{ userId: string; providerId: string; slotId: string }> = ({
-  userId,
-  providerId,
-  slotId,
-}) => {
+const ReviewBookingPage: React.FC = () => {
+  const { state } = useLocation();
+  const navigate = useNavigate();
+
+  // Destructure values passed from UserInformationPage
+  const { userId, providerId, slotId, notes } = state || {};
+
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  const [notes, setNotes] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
 
-  // Fetch booking preview
+  // Fetch booking preview details
   useEffect(() => {
     const fetchPreview = async () => {
+      if (!userId || !providerId || !slotId) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}bookings/preview`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, providerId, slotId }),
-        });
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}bookings/preview`,
+          {
+            params: { userId, providerId, slotId },
+          }
+        );
 
-        if (!res.ok) throw new Error("Failed to fetch booking details");
-        const data = await res.json();
-
-        setSelectedProvider(data.selectedProvider);
-        setSelectedSlot(data.selectedSlot);
-        setUserInfo(data.userInfo);
-        setNotes(data.notes);
+        setSelectedProvider(res.data.selectedProvider);
+        setSelectedSlot(res.data.selectedSlot);
+        setUserInfo(res.data.userInfo);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching preview:", err);
       } finally {
         setLoading(false);
       }
@@ -58,21 +63,23 @@ const ReviewBookingPage: React.FC<{ userId: string; providerId: string; slotId: 
     fetchPreview();
   }, [userId, providerId, slotId]);
 
+  // Confirm booking
   const handleConfirm = async () => {
+    if (!userId || !providerId || !slotId) return;
+
     setConfirming(true);
     try {
-      const res = await fetch("http://localhost:5000/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, providerId, slotId, notes }),
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}bookings`,
+        { userId, providerId, slotId, notes }
+      );
 
-      if (!res.ok) throw new Error("Failed to confirm booking");
-      const data = await res.json();
       alert("Booking confirmed successfully!");
-      console.log("Booking saved:", data);
+      console.log("Booking saved:", res.data);
+
+      navigate("/"); // ✅ redirect to home (or success page)
     } catch (err) {
-      console.error(err);
+      console.error("Error confirming booking:", err);
       alert("Error confirming booking");
     } finally {
       setConfirming(false);
@@ -87,7 +94,7 @@ const ReviewBookingPage: React.FC<{ userId: string; providerId: string; slotId: 
     <div className="max-w-xl mx-auto space-y-6">
       <div className="text-center">
         <button
-          onClick={() => window.history.back()}
+          onClick={() => navigate(-1)}
           className="text-blue-600 hover:underline mb-2"
         >
           ← Back to details
@@ -115,7 +122,8 @@ const ReviewBookingPage: React.FC<{ userId: string; providerId: string; slotId: 
         <div>
           <h3 className="font-semibold text-lg text-gray-800">Date & Time</h3>
           <p className="text-gray-700">
-            {selectedSlot.date} at {selectedSlot.startTime} - {selectedSlot.endTime}
+            {selectedSlot.date} at {selectedSlot.startTime} -{" "}
+            {selectedSlot.endTime}
           </p>
         </div>
 
@@ -141,7 +149,9 @@ const ReviewBookingPage: React.FC<{ userId: string; providerId: string; slotId: 
         {/* Price */}
         <div>
           <h3 className="font-semibold text-lg text-gray-800">Price</h3>
-          <p className="text-green-600 font-semibold">${selectedSlot.price}</p>
+          <p className="text-green-600 font-semibold">
+            ${selectedSlot.price}
+          </p>
         </div>
       </div>
 

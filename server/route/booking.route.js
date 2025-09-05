@@ -4,7 +4,7 @@ import { getUserBookings,previewBooking } from "../controller/booking.controller
 const bookingrouter = Router();
 
 bookingrouter.get("/user/:userId", getUserBookings);
-bookingrouter.post("/preview", previewBooking);
+bookingrouter.get("/preview", previewBooking);
 
 
 export default bookingrouter;

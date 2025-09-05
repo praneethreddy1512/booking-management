@@ -21,22 +21,26 @@ export const getUserBookings = async (req, res) => {
 
 export const previewBooking = async (req, res) => {
   try {
-    const { userId, providerId, slotId } = req.body;
+    const { userId, providerId, slotId } = req.query; // now using query params
 
-    const user = await UserModel.findById(userId).select("name email phone address");
-    const provider = await ProviderModel.findById(providerId).select("name service");
-    const slot = await SlotModel.findById(slotId).select("date startTime endTime price");
+    const latestBooking = await BookingModel.findOne({ userId, providerId, slotId })
+      .sort({ createdAt: -1 })
+      .populate("userId", "name email phone address")
+      .populate("providerId", "name service")
+      .populate("slotId", "date startTime endTime price");
 
-    if (!user || !provider || !slot) {
-      return res.status(404).json({ message: "Details not found" });
+    if (!latestBooking) {
+      return res.status(404).json({ message: "Booking details not found" });
     }
 
     res.status(200).json({
-      userInfo: user,
-      selectedProvider: provider,
-      selectedSlot: slot,
+      userInfo: latestBooking.userId,
+      selectedProvider: latestBooking.providerId,
+      selectedSlot: latestBooking.slotId,
+      notes: latestBooking.notes || null,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Error fetching preview", error });
   }
 };

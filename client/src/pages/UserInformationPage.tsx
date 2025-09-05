@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-const UserInformationPage = () => {
+import { useNavigate, useLocation } from "react-router-dom";
+
+const UserInformationPage: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // ✅ provider & slot info passed from SlotSelectionPage
+  const { provider, slot } = location.state || {};
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -10,140 +16,104 @@ const UserInformationPage = () => {
     address: "",
     notes: "",
   });
-  const navigate = useNavigate();
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}users/create`, formData);
-      if (!response) {
-        toast.error("Failed to create user");
-      }
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}users/create`,
+        formData
+      );
 
-      const data =  response;
-      console.log("User created:", data);
+      const userId = res.data._id;
 
-      if (data) {
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          address: "",
-          notes: "",
-        });
-        toast.success("User created successfully!");
-        navigate("/review" );
-      }
+      // ✅ Navigate to ReviewBookingPage with state
+      navigate("/review", {
+        state: {
+          userId,
+          providerId: provider._id,
+          slotId: slot._id,
+          notes: formData.notes,
+        },
+      });
     } catch (error) {
-      toast.error("Error creating user:" + error);
+      console.error("Error creating user:", error);
+      alert("Failed to save user info. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <>
-      <div className="max-w-md mx-auto space-y-6">
-        <div className="text-center">
-          <button
-            onClick={() => window.history.back()}
-            className="text-blue-600 hover:underline mb-2"
-          >
-            ← Back to time slots
-          </button>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Your Information
-          </h2>
-          <p className="text-gray-600">Please provide your contact details</p>
-        </div>
+    <div className="max-w-lg mx-auto p-6">
+      <h2 className="text-2xl font-bold mb-4 text-center">Your Information</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="text"
+          name="name"
+          placeholder="Name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+          className="w-full border p-2 rounded"
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          className="w-full border p-2 rounded"
+        />
+        <input
+          type="text"
+          name="phone"
+          placeholder="Phone"
+          value={formData.phone}
+          onChange={handleChange}
+          required
+          className="w-full border p-2 rounded"
+        />
+        <input
+          type="text"
+          name="address"
+          placeholder="Address"
+          value={formData.address}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+        <textarea
+          name="notes"
+          placeholder="Any notes for provider"
+          value={formData.notes}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
 
-        <form className="space-y-4" onSubmit={(e)=>handleSubmit(e)}>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name *
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your full name"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email *
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone *
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your phone number"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address
-            </label>
-            <textarea
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your address (optional)"
-              rows={3}
-            />
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Additional Notes
-            </label>
-            <textarea
-              name="notes"
-              value={formData.notes}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Any special requests or notes?"
-              rows={3}
-            />
-          </div>
-
-          <button
-            type="submit"
-          
-            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
-          >
-            Continue to Review
-          </button>
-        </form>
-      </div>
-    </>
+        <button
+          type="submit"
+          disabled={submitting}
+          className={`w-full py-3 font-semibold rounded-lg transition ${
+            submitting
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
+          }`}
+        >
+          {submitting ? "Saving..." : "Continue to Review"}
+        </button>
+      </form>
+    </div>
   );
 };
 
