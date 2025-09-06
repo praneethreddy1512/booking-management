@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AddProvider from './pages/AddProvider';
 import { Toaster } from 'react-hot-toast';
 import SlotSelectionPage from './pages/SlotSelectionPage';
+ import Mybooking from './pages/Mybooking';
 
 const App: React.FC = () => {
 
@@ -23,6 +24,7 @@ const App: React.FC = () => {
         <Route path="/user-info" element={<UserInformationPage />} />
         <Route path="/review" element={<ReviewBookingPage />} />
         <Route path="/success/:bookingId" element={<BookingSuccessPage />} />
+        <Route path="/mybooking" element={<Mybooking />} />
       </Routes>
     </BrowserRouter>
     </>

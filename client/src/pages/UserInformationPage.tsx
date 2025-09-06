@@ -25,33 +25,35 @@ const UserInformationPage: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setSubmitting(true);
 
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}users/create`,
-        formData
-      );
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}users/create`,
+      formData
+    );
 
-      const userId = res.data._id;
+    // ✅ check if backend returned existing user or new user
+    const userData = res.data.user || res.data; 
+    const userId = userData._id;
 
-      navigate("/review", {
-        state: {
-          userId,
-          providerId: provider._id,
-          slotId: slot._id,
-          notes: formData.notes,
-        },
-      });
-    } catch (error) {
-      console.error("Error creating user:", error);
-      alert("Failed to save user info. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    navigate("/review", {
+      state: {
+        userId,
+        providerId: provider._id,
+        slotId: slot._id,
+        notes: formData.notes,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating user:", error);
+    alert("Failed to save user info. Please try again.");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <div className="max-w-lg mx-auto p-6">

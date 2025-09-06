@@ -123,3 +123,24 @@ export const getBookingById = async (req, res) => {
     res.status(500).json({ message: "Error fetching booking", error });
   }
 };
+
+
+export const cancelBooking = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+
+    const booking = await BookingModel.findById(bookingId);
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+
+    // free up slot
+    await SlotModel.findByIdAndUpdate(booking.slotId, { isBooked: false });
+
+    // update booking status
+    booking.status = "cancelled";
+    await booking.save();
+
+    res.json({ message: "Booking cancelled", booking });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
