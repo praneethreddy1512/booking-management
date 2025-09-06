@@ -28,24 +28,25 @@ const AddProvider = () => {
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+  const { name, value } = e.target;
 
-        if (name.includes('.')) {
-            const [parent, child] = name.split('.') as ['workingHours', 'start' | 'end'];
-            setData((prevData) => ({
-                ...prevData,
-                [parent]: {
-                    ...prevData[parent as keyof ProviderData],
-                    [child]: value
-                }
-            }));
-        } else {
-            setData((prevData) => ({
-                ...prevData,
-                [name]: value
-            }));
-        }
-    };
+  if (name.startsWith("workingHours.")) {
+    const child = name.split(".")[1] as "start" | "end";
+    setData((prevData) => ({
+      ...prevData,
+      workingHours: {
+        ...prevData.workingHours,
+        [child]: value,
+      },
+    }));
+  } else {
+    setData((prevData) => ({
+      ...prevData,
+      [name]: name === "hourlyRate" ? Number(value) : value, 
+    }));
+  }
+};
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
