@@ -37,7 +37,6 @@ const UserInformationPage: React.FC = () => {
 
       const userId = res.data._id;
 
-      // ✅ Navigate to ReviewBookingPage with state
       navigate("/review", {
         state: {
           userId,

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 interface Provider {
   service: string;
@@ -8,6 +9,7 @@ interface Provider {
 }
 
 interface Slot {
+  _id: string;
   date: string;
   startTime: string;
   endTime: string;
@@ -25,7 +27,7 @@ const ReviewBookingPage: React.FC = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  // Destructure values passed from UserInformationPage
+  // values passed from UserInformationPage
   const { userId, providerId, slotId, notes } = state || {};
 
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
@@ -55,6 +57,7 @@ const ReviewBookingPage: React.FC = () => {
         setUserInfo(res.data.userInfo);
       } catch (err) {
         console.error("Error fetching preview:", err);
+        toast.error("Failed to fetch booking details");
       } finally {
         setLoading(false);
       }
@@ -63,35 +66,41 @@ const ReviewBookingPage: React.FC = () => {
     fetchPreview();
   }, [userId, providerId, slotId]);
 
-  // Confirm booking
-  const handleConfirm = async () => {
-    if (!userId || !providerId || !slotId) return;
+const handleConfirm = async () => {
+  if (!userId || !providerId || !slotId) return;
 
-    setConfirming(true);
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}bookings`,
-        { userId, providerId, slotId, notes }
-      );
+  setConfirming(true);
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}bookings/confirm`,
+      { userId, providerId, slotId, notes }
+    );
 
-      alert("Booking confirmed successfully!");
-      console.log("Booking saved:", res.data);
+    const bookingId = res.data.booking._id;
+    toast.success("Booking confirmed!");
+    navigate(`/success/${bookingId}`);
+  } catch (err: any) {
+    console.error("Error confirming booking:", err);
 
-      navigate("/"); // ✅ redirect to home (or success page)
-    } catch (err) {
-      console.error("Error confirming booking:", err);
-      alert("Error confirming booking");
-    } finally {
-      setConfirming(false);
+    if (err.response?.status === 400 && err.response?.data?.message === "Slot already booked") {
+      toast.error("Sorry, this slot has already been booked. Please select another one.");
+      navigate("/"); 
+    } else {
+      toast.error(err.response?.data?.message || "Error confirming booking");
     }
-  };
+  } finally {
+    setConfirming(false);
+  }
+};
 
-  if (loading) return <p className="text-center">Loading booking details...</p>;
+
+  if (loading)
+    return <p className="text-center text-gray-600">Loading booking details...</p>;
   if (!selectedProvider || !selectedSlot || !userInfo)
     return <p className="text-center text-red-500">Booking details not found</p>;
 
   return (
-    <div className="max-w-xl mx-auto space-y-6">
+    <div className="max-w-xl mx-auto space-y-6 p-4">
       <div className="text-center">
         <button
           onClick={() => navigate(-1)}
@@ -107,7 +116,7 @@ const ReviewBookingPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="border border-gray-200 rounded-lg p-6 space-y-4">
+      <div className="border border-gray-200 rounded-lg p-6 space-y-4 bg-white shadow">
         {/* Service & Provider */}
         <div>
           <h3 className="font-semibold text-lg text-gray-800">
@@ -122,8 +131,7 @@ const ReviewBookingPage: React.FC = () => {
         <div>
           <h3 className="font-semibold text-lg text-gray-800">Date & Time</h3>
           <p className="text-gray-700">
-            {selectedSlot.date} at {selectedSlot.startTime} -{" "}
-            {selectedSlot.endTime}
+            {selectedSlot.date} at {selectedSlot.startTime} – {selectedSlot.endTime}
           </p>
         </div>
 
@@ -149,9 +157,7 @@ const ReviewBookingPage: React.FC = () => {
         {/* Price */}
         <div>
           <h3 className="font-semibold text-lg text-gray-800">Price</h3>
-          <p className="text-green-600 font-semibold">
-            ${selectedSlot.price}
-          </p>
+          <p className="text-green-600 font-semibold">${selectedSlot.price}</p>
         </div>
       </div>
 

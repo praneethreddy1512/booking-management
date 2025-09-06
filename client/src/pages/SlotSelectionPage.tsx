@@ -135,33 +135,38 @@ const SlotSelectionPage: React.FC = () => {
       }
     }
   };
+const handleSlotSelect = async (slot: TimeSlot) => {
+  if (!selectedProvider || !selectedDate) return;
 
-  const handleSlotSelect = async (slot: TimeSlot) => {
-    if (!selectedProvider || !selectedDate) return;
-
-    try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}slots/create`, {
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL}slots/create`,
+      {
         providerId: selectedProvider._id,
         date: selectedDate,
         startTime: slot.startTime,
         endTime: slot.endTime,
         price: slot.price,
-      });
-
-      if (response.status === 201) {
-        toast.success("Slot booked successfully!");
-        navigate("/user-info", {
-          state: {
-            provider: selectedProvider,
-            date: selectedDate,
-            slot: slot,
-          },
-        });
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Error booking slot");
+    );
+
+    if (response.status === 201) {
+      const createdSlot = response.data; // ✅ contains the real MongoDB _id
+
+      toast.success("Slot created successfully!");
+      navigate("/user-info", {
+        state: {
+          provider: selectedProvider,
+          date: selectedDate,
+          slot: createdSlot, // ✅ pass full slot object from backend
+        },
+      });
     }
-  };
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || "Error booking slot");
+  }
+};
+
 
   if (loadingProvider) {
     return (

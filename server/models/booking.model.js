@@ -33,7 +33,6 @@ const bookingSchema = new mongoose.Schema({
 
 });
 
-// Compound index for faster latest lookup
 bookingSchema.index({ userId: 1, slotId: 1, providerId: 1, createdAt: -1 });
 
 const BookingModel = mongoose.model('BookingModel', bookingSchema);

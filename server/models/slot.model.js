@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const slotSchema = new mongoose.Schema({
+  
   providerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'ProviderModel',
