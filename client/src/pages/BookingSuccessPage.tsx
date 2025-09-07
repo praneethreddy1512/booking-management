@@ -35,7 +35,7 @@ const BookingSuccessPage: React.FC = () => {
       <CheckCircle className="w-16 h-16 mx-auto text-green-500" />
       <h2 className="text-2xl font-bold text-gray-900">Booking Confirmed!</h2>
       <p className="text-gray-600">
-        Your booking with <strong>{booking.providerId.name}</strong> is confirmed.
+        Your booking with <span>{booking.providerId.name}</span> is confirmed.
       </p>
       <div className="bg-gray-50 p-4 rounded-lg text-left">
         <p>
