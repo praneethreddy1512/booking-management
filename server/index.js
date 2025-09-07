@@ -13,8 +13,8 @@ dotenv.config();
 const app = express();
 
 app.use(cros({
-    origin: ["https://booking-management-phi.vercel.app/"],
-    credentials: true
+    Credentials: true,
+    origin: "*"
 })
 )
 
