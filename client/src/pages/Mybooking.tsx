@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 
 interface Booking {
   _id: string;
@@ -11,8 +11,9 @@ interface Booking {
 }
 
 const Mybooking: React.FC = () => {
-  const location = useLocation();
-  const { userId } = location.state || {}; 
+  const { userId } = useParams<{ userId: string }>();
+  const [searchParams] = useSearchParams();
+  const bookingIdFromUrl = searchParams.get("bookingId");
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +39,7 @@ const Mybooking: React.FC = () => {
 
   const handleCancel = async (bookingId: string) => {
     try {
-      await axios.put(
+      await axios.delete(
         `${import.meta.env.VITE_API_URL}bookings/cancel/${bookingId}`
       );
       setBookings((prev) =>
@@ -64,13 +65,13 @@ const Mybooking: React.FC = () => {
           {bookings.map((b) => (
             <div
               key={b._id}
-              className="border rounded-lg p-4 shadow-md bg-white flex justify-between items-center"
+              className={`border rounded-lg p-4 shadow-md bg-white flex justify-between items-center ${
+                b._id === bookingIdFromUrl ? "border-blue-500 bg-blue-50" : ""
+              }`}
             >
               <div>
                 <p className="font-semibold">{b.providerId?.name}</p>
-                <p className="text-sm text-gray-600">
-                  {b.providerId?.service}
-                </p>
+                <p className="text-sm text-gray-600">{b.providerId?.service}</p>
                 <p className="text-sm">
                   {b.slotId?.date} ({b.slotId?.startTime} - {b.slotId?.endTime})
                 </p>

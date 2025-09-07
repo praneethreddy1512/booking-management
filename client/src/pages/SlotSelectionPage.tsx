@@ -107,16 +107,13 @@ const SlotSelectionPage: React.FC = () => {
 
     if (providerId && selectedProvider) {
       try {
-        // generate all slots
         const allSlots = generateSlots(selectedProvider, date);
 
-        // fetch booked slots from backend
         const response = await axios.get(
           `${import.meta.env.VITE_API_URL}slots/${providerId}/${date}`
         );
         const bookedSlots = response.data;
 
-        // merge booked status
         const mergedSlots = allSlots.map((slot) => {
           const booked = bookedSlots.find(
             (b: any) =>
@@ -151,14 +148,14 @@ const handleSlotSelect = async (slot: TimeSlot) => {
     );
 
     if (response.status === 201) {
-      const createdSlot = response.data; // ✅ contains the real MongoDB _id
+      const createdSlot = response.data; 
 
       toast.success("Slot created successfully!");
       navigate("/user-info", {
         state: {
           provider: selectedProvider,
           date: selectedDate,
-          slot: createdSlot, // ✅ pass full slot object from backend
+          slot: createdSlot,
         },
       });
     }

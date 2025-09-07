@@ -1,6 +1,5 @@
-// BookingSuccessPage.tsx
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { CheckCircle } from "lucide-react";
 
@@ -15,7 +14,7 @@ const BookingSuccessPage: React.FC = () => {
     const fetchBooking = async () => {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}bookings/confirmation/${bookingId}`
+          `${import.meta.env.VITE_API_URL}bookings/${bookingId}`
         );
         setBooking(res.data);
       } catch (err) {
@@ -29,7 +28,6 @@ const BookingSuccessPage: React.FC = () => {
   }, [bookingId]);
 
   if (loading) return <p className="text-center">Loading booking details...</p>;
-
   if (!booking) return <p className="text-center text-red-500">Booking not found</p>;
 
   return (
@@ -53,12 +51,21 @@ const BookingSuccessPage: React.FC = () => {
           <strong>Booked By:</strong> {booking.userId.name} ({booking.userId.email})
         </p>
       </div>
+
       <button
         onClick={() => navigate("/")}
         className="mt-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
       >
         Book Another Service
       </button>
+
+      <Link to={`/mybooking/${booking.userId._id}?bookingId=${booking._id}`}>
+        <button
+          className="mt-6 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg ml-2 hover:bg-green-700 transition"
+        >
+          View My Bookings
+        </button>
+      </Link>
     </div>
   );
 };

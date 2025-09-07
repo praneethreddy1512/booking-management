@@ -89,7 +89,6 @@ const AddProvider = () => {
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
             <div className="max-w-2xl mx-auto">
 
-                {/* Header */}
                 <div className="text-center mb-8">
                    
                     <h1 className="text-5xl font-bold bg-clip-text  mb-2">
@@ -181,7 +180,6 @@ const AddProvider = () => {
                                 </select>
                             </div>
 
-                            {/* Hourly Rate */}
                             <div>
                                 <label htmlFor="hourlyRate" className="block font-semibold text-gray-700 mb-3 text-sm uppercase tracking-wider">
                                     Hourly Rate 
@@ -203,7 +201,6 @@ const AddProvider = () => {
                                 </div>
                             </div>
 
-                            {/* Working Hours */}
                             <div>
                                 <label className="block font-semibold text-gray-700 mb-3 text-sm uppercase tracking-wider">
                                     Working Hours

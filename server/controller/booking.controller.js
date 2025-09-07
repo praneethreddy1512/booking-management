@@ -7,12 +7,12 @@ export const getUserBookings = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const bookings = await BookingModel.find({ userId, status: "confirmed" })
+    const bookings = await BookingModel.find({ userId })
       .populate("slotId")
       .populate("providerId");
 
     if (!bookings || bookings.length === 0) {
-      return res.status(404).json({ message: "No bookings found" });
+      return res.status(200).json([]); 
     }
 
     res.status(200).json(bookings);
@@ -46,7 +46,6 @@ const slot = await SlotModel.findById(slotId);
 
 
 
-// controller/booking.controller.js
 
 export const confirmBooking = async (req, res) => {
   try {
@@ -57,7 +56,6 @@ export const confirmBooking = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // check slot
     const slot = await SlotModel.findById(slotId);
     console.log("Slot before booking:", slot);
 
@@ -68,11 +66,9 @@ export const confirmBooking = async (req, res) => {
       return res.status(400).json({ message: "Slot already booked" });
     }
 
-    // mark slot as booked
     slot.status = "booked";
     await slot.save();
 
-    // create booking
     const booking = await BookingModel.create({
       userId,
       providerId,
@@ -81,7 +77,6 @@ export const confirmBooking = async (req, res) => {
       notes: notes || "",
     });
 
-    // populate booking details properly
     const populatedBooking = await BookingModel.findById(booking._id)
       .populate("userId", "name email phone address")
       .populate("providerId", "name service")
@@ -93,7 +88,6 @@ export const confirmBooking = async (req, res) => {
     });
   } catch (error) {
     if (error.code === 11000) {
-      // duplicate key error (slot already booked by another user)
       return res.status(400).json({ message: "Slot already booked" });
     }
     console.error("Confirm booking error:", error);
@@ -132,15 +126,16 @@ export const cancelBooking = async (req, res) => {
     const booking = await BookingModel.findById(bookingId);
     if (!booking) return res.status(404).json({ error: "Booking not found" });
 
-    // free up slot
-    await SlotModel.findByIdAndUpdate(booking.slotId, { isBooked: false });
+    // free up slot again
+    await SlotModel.findByIdAndUpdate(booking.slotId, { status: "available" });
 
-    // update booking status
+    // mark booking as cancelled
     booking.status = "cancelled";
     await booking.save();
 
-    res.json({ message: "Booking cancelled", booking });
+    res.json({ message: "Booking cancelled successfully", booking });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
+

@@ -7,11 +7,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-<<<<<<< HEAD
     "build": "echo \"No build step required\"",
-=======
-    "build": "echo 'No build step required'",
->>>>>>> ddadbf792426a8afded2b8aeb54c6bf3a817a68a
     "start": "node index.js",
     "dev": "nodemon index.js"
   },

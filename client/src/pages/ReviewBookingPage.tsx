@@ -27,7 +27,6 @@ const ReviewBookingPage: React.FC = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  // values passed from UserInformationPage
   const { userId, providerId, slotId, notes } = state || {};
 
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
@@ -36,7 +35,6 @@ const ReviewBookingPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
 
-  // Fetch booking preview details
   useEffect(() => {
     const fetchPreview = async () => {
       if (!userId || !providerId || !slotId) {
@@ -127,7 +125,6 @@ const handleConfirm = async () => {
           </p>
         </div>
 
-        {/* Date & Time */}
         <div>
           <h3 className="font-semibold text-lg text-gray-800">Date & Time</h3>
           <p className="text-gray-700">
@@ -135,7 +132,6 @@ const handleConfirm = async () => {
           </p>
         </div>
 
-        {/* Contact Info */}
         <div>
           <h3 className="font-semibold text-lg text-gray-800">Contact Info</h3>
           <p className="text-gray-700">
@@ -146,7 +142,6 @@ const handleConfirm = async () => {
           )}
         </div>
 
-        {/* Notes */}
         {notes && (
           <div>
             <h3 className="font-semibold text-lg text-gray-800">Notes</h3>
@@ -154,7 +149,6 @@ const handleConfirm = async () => {
           </div>
         )}
 
-        {/* Price */}
         <div>
           <h3 className="font-semibold text-lg text-gray-800">Price</h3>
           <p className="text-green-600 font-semibold">${selectedSlot.price}</p>
