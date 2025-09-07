@@ -13,8 +13,8 @@ dotenv.config();
 const app = express();
 
 app.use(cros({
-    Credentials: true,
-    origin: "*"
+    origin: "*",
+    credentials: true
 })
 )
 
