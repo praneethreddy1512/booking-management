@@ -14,7 +14,7 @@ const app = express();
 
 app.use(cros({
     Credentials: true,
-    origin: process.env.CLIENT_URL
+    origin: "*"
 })
 )
 
