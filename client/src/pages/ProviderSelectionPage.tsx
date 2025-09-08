@@ -1,10 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Clock, Mail, Phone, DollarSign } from "lucide-react";
-import axios from "axios";  
-
-import { useEffect, useState } from "react";
-import { Link,useLocation } from "react-router-dom";
-
+import axios from "axios";
+import { Link, useParams } from "react-router-dom";
 
 interface Provider {
   _id: string | number;
@@ -13,42 +10,51 @@ interface Provider {
   phone: string;
   email: string;
   workingHours: {
-    start: string; 
-    end: string;   
+    start: string;
+    end: string;
   };
-  hourlyRate: number | string; 
+  hourlyRate: number | string;
 }
 
 const ProviderSelectionPage: React.FC = () => {
-  const location = useLocation();
-  const category = location.pathname.split("/").pop();
-  console.log("Category:", category);
-
+  const { category } = useParams<{ category: string }>();
   const [providers, setProviders] = useState<Provider[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   const fetchProviders = async (category: string) => {
     try {
+      setLoading(true);
+      setError("");
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}providers/get/category/${category}`
       );
       if (response.status === 200) {
         setProviders(response.data);
       } else {
-        console.error("Failed to fetch providers:", response.data.message);
+        setError("Failed to fetch providers.");
       }
     } catch (error) {
       console.error("Error fetching providers:", error);
+      setError("Something went wrong while fetching providers.");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProviders(category as string);
+    if (category) {
+      fetchProviders(category);
+    }
   }, [category]);
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="text-center">
-        <button className="text-blue-600 hover:underline mb-2" onClick={() => window.history.back()}>
+        <button
+          className="text-blue-600 hover:underline mb-2"
+          onClick={() => window.history.back()}
+        >
           ← Back to services
         </button>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -57,16 +63,29 @@ const ProviderSelectionPage: React.FC = () => {
         <p className="text-gray-600">Select a provider for your service</p>
       </div>
 
+      {/* Loader */}
+      {loading && (
+        <div className="text-center text-blue-600 font-medium">
+          Loading providers...
+        </div>
+      )}
+
+      {/* Error message */}
+      {error && !loading && (
+        <div className="text-center text-red-600 font-medium">{error}</div>
+      )}
+
+      {/* No providers */}
+      {!loading && !error && providers.length === 0 && (
+        <div className="text-center text-gray-500">
+          No providers available for this service.
+        </div>
+      )}
+
       <div className="space-y-4">
         {providers.map((provider) => (
-          <Link 
-            key={provider._id}
-            to={`/slots/${provider._id}`}
-            className="block"
-          >
-            <div
-              className="border border-gray-200 rounded-lg p-6 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer"
-            >
+          <Link key={provider._id} to={`/slots/${provider._id}`} className="block">
+            <div className="border border-gray-200 rounded-lg p-6 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg text-gray-900">
