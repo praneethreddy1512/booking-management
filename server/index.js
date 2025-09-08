@@ -1,5 +1,5 @@
 import express from 'express';
-import cros from 'cors';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -12,7 +12,7 @@ dotenv.config();
 
 const app = express();
 
-app.use(cros({
+app.use(cors({
     Credentials: true,
     origin: "*"
 })
